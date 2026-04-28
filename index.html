@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <title>🔥 하람 & 젬알 스터디룸 🔥</title>
@@ -22,51 +22,40 @@
   <style>
     body { margin: 0; font-family: 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; gap: 20px; }
     
-    #topBox { padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 340px; z-index: 1; }
+    /* 중앙 타이머 영역 */
+    #topBox { padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 340px; }
     #topTimer { font-size: 36px; font-weight: bold; color: #1a73e8; margin-bottom: 20px; font-family: monospace; }
-    .btns button { font-size: 14px; padding: 10px 12px; margin: 0 2px; cursor: pointer; border: none; border-radius: 8px; background: #1a73e8; color: white; font-weight: bold; transition: 0.2s; }
-    .btns button:hover { background: #1557b0; }
+    .btns button { font-size: 14px; padding: 10px 12px; margin: 0 2px; cursor: pointer; border: none; border-radius: 8px; background: #1a73e8; color: white; font-weight: bold; }
     
+    /* 음악 플레이어 */
     #musicBox { width: 450px; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 15px; text-align: center; }
-    #ytPlayerArea { background: #000; border-radius: 10px; height: 250px; overflow: hidden; margin-bottom: 12px; border: 1px solid #ddd; }
+    #ytPlayerArea { background: #000; border-radius: 10px; height: 250px; overflow: hidden; margin-bottom: 12px; }
 
-    #userArea { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; font-size: 14px; color: #666; }
-    #currentNick { font-weight: bold; color: #333; }
-    .edit-btn { background: #f0f2f5 !important; color: #555 !important; font-size: 11px !important; padding: 4px 8px !important; margin-left: 5px !important; }
-
+    /* 왼쪽 젬알 AI */
     #geminiContainer { position: fixed; left: 20px; top: 20px; width: 280px; display: flex; flex-direction: column; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: calc(100vh - 40px); overflow: hidden; }
-    #geminiList { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 10px; background: #f8f9fa; color: #555; }
-    .gemini-msg { background: #e8f0fe; padding: 10px; border-radius: 12px; border-bottom-left-radius: 2px; align-self: flex-start; word-break: break-all; }
-    .user-msg { background: #1a73e8; color: white; padding: 8px 12px; border-radius: 12px; border-bottom-right-radius: 2px; align-self: flex-end; word-break: break-all; }
+    #geminiList { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 10px; background: #f8f9fa; }
+    .gemini-msg { background: #e8f0fe; padding: 10px; border-radius: 12px; align-self: flex-start; word-break: break-all; }
+    .user-msg { background: #1a73e8; color: white; padding: 8px 12px; border-radius: 12px; align-self: flex-end; word-break: break-all; }
     #geminiInputBox { display: flex; border-top: 1px solid #eee; padding: 8px; gap: 5px; }
-    #geminiInput { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 8px; outline: none; font-size: 12px; }
-    #geminiSendBtn { border: none; background: #1a73e8; color: white; border-radius: 8px; padding: 0 12px; cursor: pointer; font-weight: bold; }
+    #geminiInput { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 8px; outline: none; }
 
+    /* 오른쪽 랭킹 & 채팅 */
     #sidebar { position: fixed; right: 20px; top: 20px; width: 280px; display: flex; flex-direction: column; gap: 15px; height: calc(100vh - 40px); }
-    #ranking { padding: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex-shrink: 0; }
-    .rank-title { font-size: 18px; font-weight: bold; display: block; margin-bottom: 10px; color: #333; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; text-align: center; }
-    
-    #chatContainer { flex: 1; display: flex; flex-direction: column; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; min-height: 200px; }
-    #chatList { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 8px; }
-    .chat-msg { background: #f1f3f4; padding: 6px 10px; border-radius: 10px; width: fit-content; max-width: 90%; word-break: break-all; }
-    #chatInputBox { display: flex; border-top: 1px solid #eee; padding: 5px; gap: 3px; }
-    #chatInput { flex: 1; border: none; padding: 8px; outline: none; font-size: 13px; }
-    #chatSendBtn { border: none; background: #1a73e8; color: white; border-radius: 5px; padding: 0 10px; cursor: pointer; font-weight: bold; }
-    .trash-btn { border: none; background: #e74c3c; color: white; border-radius: 5px; padding: 0 8px; cursor: pointer; font-size: 14px; }
-    
-    #musicInputArea { display: flex; gap: 5px; }
-    #musicInputArea input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 12px; outline: none; }
-    #musicInputArea button { padding: 8px 12px; background: #ff0000; color: white; border: none; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    #ranking, #chatContainer { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+    #ranking { padding: 15px; flex-shrink: 0; }
+    #chatContainer { flex: 1; display: flex; flex-direction: column; }
+    #chatList { flex: 1; padding: 15px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 5px; }
+    .rank-title { font-weight: bold; display: block; margin-bottom: 10px; text-align: center; color: #1a73e8; }
   </style>
 </head>
 <body>
 
 <div id="geminiContainer">
-  <span class="rank-title">🤖 조수 젬알</span>
-  <div id="geminiList">안녕하세요, 관리자님! 무엇을 도와드릴까요?</div>
+  <div style="padding:15px; background:#1a73e8; color:white; font-weight:bold;">🤖 조수 젬알</div>
+  <div id="geminiList">궁금한 건 언제든 물어보세요!</div>
   <div id="geminiInputBox">
-    <input type="text" id="geminiInput" placeholder="젬알에게 질문하기..." onkeypress="if(event.keyCode==13) askGemini()">
-    <button id="geminiSendBtn" onclick="askGemini()">묻기</button>
+    <input type="text" id="geminiInput" placeholder="질문 입력..." onkeypress="if(event.keyCode==13) askGemini()">
+    <button onclick="askGemini()" style="border:none; background:#1a73e8; color:white; border-radius:8px; padding:0 10px; cursor:pointer;">묻기</button>
   </div>
 </div>
 
@@ -77,131 +66,125 @@
     <button onclick="stop()">정지</button>
     <button onclick="reset()">초기화</button>
   </div>
-  <div id="userArea">
-    내 닉네임: <span id="currentNick">로딩 중...</span>
-    <button class="edit-btn" onclick="changeNickname()">변경</button>
-  </div>
+  <div style="margin-top:15px; font-size:13px;">내 닉네임: <span id="currentNick" style="font-weight:bold;">로딩 중...</span></div>
 </div>
 
 <div id="musicBox">
   <div id="ytPlayerArea">
     <iframe id="videoFrame" width="100%" height="100%" src="https://www.youtube.com/embed/DFqTkjSVlqQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
-  <div id="musicInputArea">
-    <input type="text" id="ytUrl" placeholder="노래 검색 또는 주소 붙여넣기" onkeypress="if(event.keyCode==13) handleMusic()">
-    <button onclick="handleMusic()">확인</button>
-  </div>
+  <input type="text" id="ytUrl" placeholder="노래 제목이나 주소 입력" style="width:70%; padding:8px; border-radius:5px; border:1px solid #ddd;">
+  <button onclick="handleMusic()" style="padding:8px 15px; background:#ff0000; color:white; border:none; border-radius:5px; cursor:pointer;">확인</button>
 </div>
 
 <div id="sidebar">
   <div id="ranking">
     <span class="rank-title">🟢 실시간 랭킹</span>
-    <div id="rankList">불러오는 중...</div>
+    <div id="rankList" style="font-size:13px;">불러오는 중...</div>
   </div>
   <div id="chatContainer">
-    <div id="chatList">채팅 로딩 중...</div>
-    <div id="chatInputBox">
-      <input type="text" id="chatInput" placeholder="내용 입력..." onkeypress="if(event.keyCode==13) sendChat()">
-      <button id="chatSendBtn" onclick="sendChat()">전송</button>
-      <button class="trash-btn" onclick="clearChats()">🗑️</button>
+    <div style="padding:10px; background:#f8f9fa; font-weight:bold; font-size:12px; border-bottom:1px solid #eee;">💬 실시간 채팅</div>
+    <div id="chatList"></div>
+    <div style="display:flex; padding:5px; border-top:1px solid #eee;">
+      <input type="text" id="chatInput" placeholder="메시지..." style="flex:1; border:none; outline:none;" onkeypress="if(event.keyCode==13) sendChat()">
+      <button onclick="sendChat()" style="border:none; background:#1a73e8; color:white; border-radius:4px; padding:2px 8px;">전송</button>
     </div>
   </div>
 </div>
 
 <script>
-  // 1. Gemini API 설정
-  const GEMINI_API_KEY = "AIzaSyBArkocrdF2LyT--gIX7ntTaqANziD025Q"; 
+  // 1. Gemini AI 기능
+  const GEMINI_API_KEY = "AIzaSyBArkocrdF2LyT--gIX7ntTaqANziD025Q";
 
   async function askGemini() {
     const input = document.getElementById("geminiInput");
     const list = document.getElementById("geminiList");
-    const question = input.value.trim();
-    if (!question) return;
+    if (!input.value.trim()) return;
 
+    const userMsg = input.value;
     const userDiv = document.createElement("div");
     userDiv.className = "user-msg";
-    userDiv.innerText = question;
+    userDiv.innerText = userMsg;
     list.appendChild(userDiv);
     input.value = "";
     list.scrollTop = list.scrollHeight;
 
     try {
-      // 주소 부분 정확히 수정됨!
-      const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
-      const response = await fetch(apiUrl, {
+      const cleanKey = GEMINI_API_KEY.trim();
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cleanKey}`;
+      
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: question }] }] })
+        body: JSON.stringify({ contents: [{ parts: [{ text: userMsg }] }] })
       });
-      
-      const data = await response.json();
-      const answer = data.candidates[0].content.parts[0].text;
 
-      const geminiDiv = document.createElement("div");
-      geminiDiv.className = "gemini-msg";
-      geminiDiv.innerText = "🤖 " + answer;
-      list.appendChild(geminiDiv);
+      const data = await response.json();
+      if (data.error) throw new Error(data.error.message);
+
+      const answer = data.candidates[0].content.parts[0].text;
+      const gDiv = document.createElement("div");
+      gDiv.className = "gemini-msg";
+      gDiv.innerText = "🤖 " + answer;
+      list.appendChild(gDiv);
     } catch (e) {
-      console.error(e);
       const errDiv = document.createElement("div");
-      errDiv.innerText = "❌ 연결 실패! 깃허브 주소로 접속했는지 확인해주세요.";
+      errDiv.style.color = "red";
+      errDiv.innerText = "❌ 오류: " + e.message;
       list.appendChild(errDiv);
     }
     list.scrollTop = list.scrollHeight;
   }
 
-  // 2. 타이머 및 기타 기능들
+  // 2. 타이머 및 파이어베이스 연동
   let seconds = 0; let interval = null;
-  let nickname = localStorage.getItem("nickname") || "익명_" + Math.floor(Math.random() * 1000);
+  let nickname = localStorage.getItem("nickname") || "학생_" + Math.floor(Math.random() * 1000);
   localStorage.setItem("nickname", nickname);
   document.getElementById("currentNick").innerText = nickname;
 
   function formatTime(s) { return new Date(s * 1000).toISOString().substr(11, 8); }
-  function update() { seconds++; document.getElementById("topTimer").innerText = formatTime(seconds); saveToServer(seconds, "studying"); }
-  function start() { if (!interval) interval = setInterval(update, 1000); }
-  function stop() { clearInterval(interval); interval = null; saveToServer(seconds, "resting"); }
-  function reset() { if(confirm("초기화?")) { seconds = 0; stop(); document.getElementById("topTimer").innerText = "00:00:00"; saveToServer(0, "online"); } }
+  function start() { if (!interval) interval = setInterval(() => { seconds++; document.getElementById("topTimer").innerText = formatTime(seconds); save(seconds, "studying"); }, 1000); }
+  function stop() { clearInterval(interval); interval = null; save(seconds, "resting"); }
+  function reset() { seconds = 0; stop(); document.getElementById("topTimer").innerText = "00:00:00"; save(0, "online"); }
 
-  function saveToServer(s, status) {
+  function save(s, status) {
     db.collection("users").doc(nickname).set({ name: nickname, time: s, status: status, lastUpdated: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
   }
 
   function loadRanking() {
-    db.collection("users").onSnapshot((snapshot) => {
+    db.collection("users").orderBy("time", "desc").onSnapshot(ss => {
       let html = "";
-      snapshot.docs.forEach((doc, i) => {
-        const u = doc.data();
-        html += `<div>${u.name}: ${formatTime(u.time)}</div>`;
-      });
+      ss.forEach((doc, i) => { const u = doc.data(); html += `<div>${i+1}. ${u.name} - ${formatTime(u.time)}</div>`; });
       document.getElementById("rankList").innerHTML = html;
     });
   }
 
   function sendChat() {
     const i = document.getElementById("chatInput");
+    if(!i.value.trim()) return;
     db.collection("chats").add({ name: nickname, text: i.value, time: firebase.firestore.FieldValue.serverTimestamp() });
     i.value = "";
   }
 
   function loadChats() {
-    db.collection("chats").orderBy("time", "asc").onSnapshot((snapshot) => {
+    db.collection("chats").orderBy("time", "asc").onSnapshot(ss => {
       let html = "";
-      snapshot.forEach((doc) => { html += `<div class="chat-msg"><b>${doc.data().name}:</b> ${doc.data().text}</div>`; });
+      ss.forEach(doc => { const d = doc.data(); html += `<div><b>${d.name}:</b> ${d.text}</div>`; });
       const l = document.getElementById("chatList");
       l.innerHTML = html; l.scrollTop = l.scrollHeight;
     });
   }
 
   function handleMusic() {
-    const val = document.getElementById('ytUrl').value;
-    if(val.includes("v=")) {
+    const val = document.getElementById("ytUrl").value;
+    if (val.includes("v=")) {
       const id = val.split("v=")[1].split("&")[0];
-      document.getElementById('videoFrame').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+      document.getElementById("videoFrame").src = `https://www.youtube.com/embed/${id}?autoplay=1`;
     } else {
       window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(val)}`);
     }
   }
-  
+
   loadRanking(); loadChats();
 </script>
 </body>

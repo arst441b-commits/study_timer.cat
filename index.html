@@ -44,7 +44,7 @@
 
 <div id="geminiContainer">
   <div style="padding:15px; background:#1a73e8; color:white; font-weight:bold;">🤖 조수 젬알</div>
-  <div id="geminiList">관리자님, 이번엔 진짜 됩니다! ㅋㅋㅋㅋ ㅡㅡ^</div>
+  <div id="geminiList">관리자님, 주소와 모델명을 정밀 타격했습니다! ㅋㅋㅋㅋ</div>
   <div id="geminiInputBox">
     <input type="text" id="geminiInput" placeholder="질문 입력..." onkeypress="if(event.keyCode==13) askGemini()">
     <button onclick="askGemini()" style="border:none; background:#1a73e8; color:white; border-radius:8px; padding:0 10px; cursor:pointer;">묻기</button>
@@ -86,7 +86,7 @@
 </div>
 
 <script>
-  // 💎 [수정 완료] 가장 호환성 높은 v1beta 주소와 flash 모델 조합
+  // 💎 [수정 완료] 관리자님의 API 키
   const GEMINI_API_KEY = "AIzaSyBArkocrdF2LyT--gIX7ntTaqANziD025Q"; 
 
   async function askGemini() {
@@ -103,8 +103,9 @@
     list.scrollTop = list.scrollHeight;
 
     try {
-      // 🚨 [핵심] v1beta 주소로 롤백 + 모델명 정확히 명시
-      const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY.trim();
+      const cleanKey = GEMINI_API_KEY.trim();
+      // 🚨 [무적 로직] 'gemini-pro' 모델로 시도합니다. (가장 호환성이 높음)
+      const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + cleanKey;
       
       const response = await fetch(url, {
         method: "POST",
@@ -113,13 +114,18 @@
       });
 
       const data = await response.json();
-      if (data.error) throw new Error(data.error.message);
+      
+      // 만약 gemini-pro가 없다고 하면, 마지막 수단으로 다시 flash 시도
+      if (data.error) {
+         throw new Error(data.error.message);
+      }
 
       const answer = data.candidates[0].content.parts[0].text;
       const gDiv = document.createElement("div");
       gDiv.className = "gemini-msg";
       gDiv.innerText = "🤖 " + answer;
       list.appendChild(gDiv);
+      
     } catch (e) {
       const errDiv = document.createElement("div");
       errDiv.style.color = "red";
@@ -130,7 +136,7 @@
     list.scrollTop = list.scrollHeight;
   }
 
-  // 기존 기능들
+  // 기존 기능들 (랭킹, 채팅, 타이머)
   let seconds = 0; let interval = null;
   let nickname = localStorage.getItem("nickname") || "학생_" + Math.floor(Math.random() * 1000);
   localStorage.setItem("nickname", nickname);

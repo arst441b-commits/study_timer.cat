@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🔥 하람 & 젬알 스터디룸 🔥</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -43,7 +44,7 @@
 
 <div id="geminiContainer">
   <div style="padding:15px; background:#1a73e8; color:white; font-weight:bold;">🤖 조수 젬알</div>
-  <div id="geminiList">관리자님, 주소 체계를 완전히 재조립했습니다!</div>
+  <div id="geminiList">관리자님, 새 키로 완전히 충전했습니다! 질문해 보세요! ㅋㅋㅋㅋ ㅡㅡ^</div>
   <div id="geminiInputBox">
     <input type="text" id="geminiInput" placeholder="질문 입력..." onkeypress="if(event.keyCode==13) askGemini()">
     <button onclick="askGemini()" style="border:none; background:#1a73e8; color:white; border-radius:8px; padding:0 10px; cursor:pointer;">묻기</button>
@@ -85,8 +86,8 @@
 </div>
 
 <script>
-  // 💎 관리자님 키 (띄어쓰기 오타 방지를 위해 trim() 적용)
-  const API_KEY = "AIzaSyBArkocrdF2LyT--gIX7ntTaqANziD025Q".trim(); 
+  // 💎 관리자님이 주신 새로운 API 키 적용!
+  const API_KEY = "AIzaSyBlYNK6NcgIUu6iGe4fzm6M1DKWWmcLkB4".trim(); 
 
   async function askGemini() {
     const input = document.getElementById("geminiInput");
@@ -102,27 +103,23 @@
     list.scrollTop = list.scrollHeight;
 
     try {
-      // 🚨 [최종 해결책] 주소를 템플릿 리터럴 대신 일반 문자열 합치기로 가장 원시적으로 짰습니다.
-      // 모델 이름은 가장 권장되는 gemini-1.5-flash 입니다.
-      const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
-      const response = await fetch(baseUrl + API_KEY, {
+      // 🚨 새 키와 가장 호환성 높은 v1beta/gemini-1.5-flash 주소 조합
+      const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+      
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: q }] }]
-        })
+        body: JSON.stringify({ contents: [{ parts: [{ text: q }] }] })
       });
 
-      const data = await response.json();
+      const data = await res.json();
       if (data.error) throw new Error(data.error.message);
 
-      if (data.candidates && data.candidates[0].content) {
-        const answer = data.candidates[0].content.parts[0].text;
-        const gDiv = document.createElement("div");
-        gDiv.className = "gemini-msg";
-        gDiv.innerText = "🤖 " + answer;
-        list.appendChild(gDiv);
-      }
+      const answer = data.candidates[0].content.parts[0].text;
+      const gDiv = document.createElement("div");
+      gDiv.className = "gemini-msg";
+      gDiv.innerText = "🤖 " + answer;
+      list.appendChild(gDiv);
     } catch (e) {
       const eDiv = document.createElement("div");
       eDiv.className = "gemini-msg";
@@ -133,14 +130,15 @@
     list.scrollTop = list.scrollHeight;
   }
 
-  // 랭킹 NaN 방지 & 타이머 로직
+  // 랭킹 NaN 박멸 & 타이머 로직
   let seconds = 0; let timer = null;
   let nick = localStorage.getItem("nickname") || "학생_" + Math.floor(Math.random() * 999);
   localStorage.setItem("nickname", nick);
   document.getElementById("currentNick").innerText = nick;
 
   function formatTime(s) {
-    const sec = parseInt(s) || 0; // 🚨 무조건 숫자로 변환, 실패 시 0
+    const sec = Number(s);
+    if (isNaN(sec)) return "00:00:00";
     return new Date(sec * 1000).toISOString().substr(11, 8);
   }
 
@@ -149,7 +147,7 @@
   function reset() { seconds = 0; stop(); document.getElementById("topTimer").innerText = "00:00:00"; save(0); }
   
   function save(s) {
-    const timeVal = parseInt(s) || 0;
+    const timeVal = Number(s) || 0; // 🚨 강제로 숫자로 변환하여 NaN 방지
     db.collection("users").doc(nick).set({ 
       name: nick, 
       time: timeVal, 
@@ -162,7 +160,8 @@
       let h = "";
       ss.forEach((doc, i) => {
         const u = doc.data();
-        h += `<div>${i+1}. ${u.name} - ${formatTime(u.time)}</div>`;
+        const displayTime = formatTime(u.time);
+        h += `<div>${i+1}. ${u.name} - ${displayTime}</div>`;
       });
       document.getElementById("rankList").innerHTML = h;
     });

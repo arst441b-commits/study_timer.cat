@@ -4,12 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🔥 하람 & 젬알 스터디룸 🔥</title>
-  
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  
   <script>
-    // 파이어베이스 설정 (기존 설정 유지)
     const firebaseConfig = {
       apiKey: "AIzaSyDCdI-fSfpxx4yscCegisfyoSOod-MJPtI",
       authDomain: "study-timer2.firebaseapp.com",
@@ -23,27 +20,19 @@
     const db = firebase.firestore();
     db.settings({ experimentalForceLongPolling: true });
   </script>
-
   <style>
     body { margin: 0; font-family: 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; gap: 20px; }
-    
-    /* 왼쪽 Gemini AI 영역 */
     #geminiContainer { position: fixed; left: 20px; top: 20px; width: 280px; display: flex; flex-direction: column; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: calc(100vh - 40px); overflow: hidden; }
     #geminiList { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 10px; background: #f8f9fa; }
-    .gemini-msg { background: #e8f0fe; padding: 10px; border-radius: 12px; align-self: flex-start; word-break: break-all; color: #333; }
+    .gemini-msg { background: #e8f0fe; padding: 10px; border-radius: 12px; align-self: flex-start; word-break: break-all; }
     .user-msg { background: #1a73e8; color: white; padding: 8px 12px; border-radius: 12px; align-self: flex-end; word-break: break-all; }
     #geminiInputBox { display: flex; border-top: 1px solid #eee; padding: 8px; gap: 5px; }
     #geminiInput { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 8px; outline: none; }
-
-    /* 중앙 타이머 & 유튜브 */
     #topBox { padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 340px; }
     #topTimer { font-size: 36px; font-weight: bold; color: #1a73e8; margin-bottom: 20px; font-family: monospace; }
     .btns button { font-size: 14px; padding: 10px 12px; margin: 0 2px; cursor: pointer; border: none; border-radius: 8px; background: #1a73e8; color: white; font-weight: bold; }
-    
     #musicBox { width: 450px; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 15px; text-align: center; }
     #ytPlayerArea { background: #000; border-radius: 10px; height: 250px; overflow: hidden; margin-bottom: 12px; }
-
-    /* 오른쪽 랭킹 & 채팅 */
     #sidebar { position: fixed; right: 20px; top: 20px; width: 280px; display: flex; flex-direction: column; gap: 15px; height: calc(100vh - 40px); }
     #ranking, #chatContainer { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
     #ranking { padding: 15px; flex-shrink: 0; }
@@ -55,7 +44,7 @@
 
 <div id="geminiContainer">
   <div style="padding:15px; background:#1a73e8; color:white; font-weight:bold;">🤖 조수 젬알</div>
-  <div id="geminiList">안녕하세요 관리자님! 무엇을 도와드릴까요?</div>
+  <div id="geminiList">관리자님, 이번엔 진짜 됩니다! ㅋㅋㅋㅋ ㅡㅡ^</div>
   <div id="geminiInputBox">
     <input type="text" id="geminiInput" placeholder="질문 입력..." onkeypress="if(event.keyCode==13) askGemini()">
     <button onclick="askGemini()" style="border:none; background:#1a73e8; color:white; border-radius:8px; padding:0 10px; cursor:pointer;">묻기</button>
@@ -69,7 +58,7 @@
     <button onclick="stop()">정지</button>
     <button onclick="reset()">초기화</button>
   </div>
-  <div style="margin-top:10px; font-size:12px; color:#666;">내 닉네임: <span id="currentNick" style="font-weight:bold;">...</span></div>
+  <div style="margin-top:10px; font-size:12px; color:#666;">내 닉네임: <span id="currentNick">...</span></div>
 </div>
 
 <div id="musicBox">
@@ -97,7 +86,7 @@
 </div>
 
 <script>
-  // 💎 [수정됨] 구글 Gemini API 설정
+  // 💎 [수정 완료] 가장 호환성 높은 v1beta 주소와 flash 모델 조합
   const GEMINI_API_KEY = "AIzaSyBArkocrdF2LyT--gIX7ntTaqANziD025Q"; 
 
   async function askGemini() {
@@ -106,7 +95,6 @@
     const question = input.value.trim();
     if (!question) return;
 
-    // 내 질문 표시
     const uDiv = document.createElement("div");
     uDiv.className = "user-msg";
     uDiv.innerText = question;
@@ -115,8 +103,8 @@
     list.scrollTop = list.scrollHeight;
 
     try {
-      // 🚨 [핵심] v1 정식 주소를 사용합니다.
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY.trim()}`;
+      // 🚨 [핵심] v1beta 주소로 롤백 + 모델명 정확히 명시
+      const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY.trim();
       
       const response = await fetch(url, {
         method: "POST",
@@ -142,7 +130,7 @@
     list.scrollTop = list.scrollHeight;
   }
 
-  // 타이머 & 채팅 기능
+  // 기존 기능들
   let seconds = 0; let interval = null;
   let nickname = localStorage.getItem("nickname") || "학생_" + Math.floor(Math.random() * 1000);
   localStorage.setItem("nickname", nickname);

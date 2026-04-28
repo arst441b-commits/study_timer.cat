@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🔥 하람 & 젬알 스터디룸 🔥</title>
+  <title>🔥</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
@@ -21,35 +20,46 @@
     db.settings({ experimentalForceLongPolling: true });
   </script>
   <style>
-    body { margin: 0; font-family: 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; gap: 20px; overflow: hidden; }
-    #geminiContainer { position: fixed; left: 20px; top: 20px; width: 280px; display: flex; flex-direction: column; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: calc(100vh - 40px); overflow: hidden; }
-    #geminiList { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 10px; background: #f8f9fa; }
-    .gemini-msg { background: #e8f0fe; padding: 10px; border-radius: 12px; align-self: flex-start; word-break: break-all; color: #333; }
-    .user-msg { background: #1a73e8; color: white; padding: 8px 12px; border-radius: 12px; align-self: flex-end; }
-    #geminiInputBox { display: flex; border-top: 1px solid #eee; padding: 8px; gap: 5px; }
-    #geminiInput { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 8px; outline: none; }
-    #topBox { padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 340px; }
-    #topTimer { font-size: 40px; font-weight: bold; color: #1a73e8; margin-bottom: 20px; font-family: monospace; }
-    .btns button { font-size: 16px; padding: 10px 18px; margin: 0 5px; cursor: pointer; border: none; border-radius: 8px; background: #1a73e8; color: white; font-weight: bold; }
-    #musicBox { width: 480px; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 15px; text-align: center; }
-    #ytPlayerArea { background: #000; border-radius: 10px; height: 260px; overflow: hidden; margin-bottom: 12px; }
+    body { margin: 0; font-family: 'Malgun Gothic', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; gap: 20px; }
+    #topBox { padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 340px; z-index: 1; }
+    #topTimer { font-size: 36px; font-weight: bold; color: #1a73e8; margin-bottom: 20px; font-family: monospace; }
+    .btns button { font-size: 14px; padding: 10px 12px; margin: 0 2px; cursor: pointer; border: none; border-radius: 8px; background: #1a73e8; color: white; font-weight: bold; transition: 0.2s; }
+    .btns button:hover { background: #1557b0; }
+    
+    #musicBox { width: 450px; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 15px; text-align: center; }
+    #ytPlayerArea { background: #000; border-radius: 10px; height: 250px; overflow: hidden; margin-bottom: 12px; border: 1px solid #ddd; }
+
+    #userArea { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; font-size: 14px; color: #666; }
+    #currentNick { font-weight: bold; color: #333; }
+    .edit-btn { background: #f0f2f5 !important; color: #555 !important; font-size: 11px !important; padding: 4px 8px !important; margin-left: 5px !important; }
+
     #sidebar { position: fixed; right: 20px; top: 20px; width: 280px; display: flex; flex-direction: column; gap: 15px; height: calc(100vh - 40px); }
-    #ranking, #chatContainer { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
-    #ranking { padding: 15px; flex-shrink: 0; max-height: 50%; overflow-y: auto; }
-    #chatContainer { flex: 1; display: flex; flex-direction: column; }
-    #chatList { flex: 1; padding: 10px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 5px; }
+    #ranking { padding: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex-shrink: 0; }
+    .rank-title { font-size: 18px; font-weight: bold; display: block; margin-bottom: 10px; color: #333; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; text-align: center; }
+    .user-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; font-size: 14px; }
+    .user-name { font-weight: 600; color: #555; }
+    .user-time { font-family: monospace; font-weight: bold; color: #d93025; }
+    
+    .status-dot { font-size: 10px; margin-left: 5px; vertical-align: middle; }
+    .dot-online { color: #bdc3c7; } 
+    .dot-studying { color: #2ecc71; } 
+    .dot-resting { color: #e74c3c; } 
+
+    #chatContainer { flex: 1; display: flex; flex-direction: column; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; min-height: 200px; }
+    #chatList { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 8px; }
+    .chat-msg { background: #f1f3f4; padding: 6px 10px; border-radius: 10px; width: fit-content; max-width: 90%; word-break: break-all; }
+    .chat-msg b { color: #1a73e8; margin-right: 5px; }
+    #chatInputBox { display: flex; border-top: 1px solid #eee; padding: 5px; gap: 3px; }
+    #chatInput { flex: 1; border: none; padding: 8px; outline: none; font-size: 13px; }
+    #chatSendBtn { border: none; background: #1a73e8; color: white; border-radius: 5px; padding: 0 10px; cursor: pointer; font-weight: bold; }
+    .trash-btn { border: none; background: #e74c3c; color: white; border-radius: 5px; padding: 0 8px; cursor: pointer; font-size: 14px; }
+    
+    #musicInputArea { display: flex; gap: 5px; }
+    #musicInputArea input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 12px; outline: none; }
+    #musicInputArea button { padding: 8px 12px; background: #ff0000; color: white; border: none; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
   </style>
 </head>
 <body>
-
-<div id="geminiContainer">
-  <div style="padding:15px; background:#1a73e8; color:white; font-weight:bold;">🤖 조수 젬알</div>
-  <div id="geminiList">관리자님, 새 키로 완전히 충전했습니다! 질문해 보세요! ㅋㅋㅋㅋ ㅡㅡ^</div>
-  <div id="geminiInputBox">
-    <input type="text" id="geminiInput" placeholder="질문 입력..." onkeypress="if(event.keyCode==13) askGemini()">
-    <button onclick="askGemini()" style="border:none; background:#1a73e8; color:white; border-radius:8px; padding:0 10px; cursor:pointer;">묻기</button>
-  </div>
-</div>
 
 <div id="topBox">
   <div id="topTimer">00:00:00</div>
@@ -58,142 +68,168 @@
     <button onclick="stop()">정지</button>
     <button onclick="reset()">초기화</button>
   </div>
-  <div style="margin-top:10px; font-size:12px; color:#666;">내 닉네임: <span id="currentNick">...</span></div>
+  <div id="userArea">
+    내 닉네임: <span id="currentNick">로딩 중...</span>
+    <button class="edit-btn" onclick="changeNickname()">변경</button>
+  </div>
 </div>
 
 <div id="musicBox">
   <div id="ytPlayerArea">
-    <iframe id="videoFrame" width="100%" height="100%" src="https://www.youtube.com/embed/DFqTkjSVlqQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe id="videoFrame" width="100%" height="100%" src="https://www.youtube.com/embed/DFqTkjSVlqQ?start=49&autoplay=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
-  <div style="display:flex; gap:5px;">
-    <input type="text" id="ytUrl" placeholder="노래 제목이나 주소" style="flex:1; padding:8px; border-radius:5px; border:1px solid #ddd;">
-    <button onclick="handleMusic()" style="padding:8px 15px; background:#ff0000; color:white; border:none; border-radius:5px; cursor:pointer;">확인</button>
+  <div id="musicInputArea">
+    <input type="text" id="ytUrl" placeholder="노래 검색 또는 주소 붙여넣기" onkeypress="if(event.keyCode==13) handleMusic()">
+    <button onclick="handleMusic()">확인</button>
   </div>
+  <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">*단어를 쓰면 검색, 주소를 쓰면 노래가 재생돼요!</p>
 </div>
 
 <div id="sidebar">
   <div id="ranking">
-    <b style="color:#1a73e8; font-size: 14px;">🟢 실시간 랭킹</b>
-    <div id="rankList" style="font-size: 12px; margin-top: 10px;">로딩 중...</div>
+    <span class="rank-title">🟢 실시간 랭킹</span>
+    <div id="rankList">불러오는 중...</div>
   </div>
   <div id="chatContainer">
-    <div id="chatList"></div>
-    <div style="display:flex; padding:8px; border-top:1px solid #eee;">
-      <input type="text" id="chatInput" placeholder="메시지..." style="flex:1; border:none; outline:none;" onkeypress="if(event.keyCode==13) sendChat()">
-      <button onclick="sendChat()" style="border:none; background:#1a73e8; color:white; border-radius:4px; padding:4px 10px;">전송</button>
+    <div id="chatList">채팅 로딩 중...</div>
+    <div id="chatInputBox">
+      <input type="text" id="chatInput" placeholder="내용을 입력하세용."onkeypress="if(event.keyCode==13) sendChat()">
+      <button id="chatSendBtn" onclick="sendChat()">전송</button>
+      <button class="trash-btn" onclick="clearChats()">🗑️</button>
     </div>
   </div>
 </div>
 
 <script>
-  // 💎 관리자님이 주신 새로운 API 키 적용!
-  const API_KEY = "AIzaSyBlYNK6NcgIUu6iGe4fzm6M1DKWWmcLkB4".trim(); 
+  let seconds = 0;
+  let interval = null;
+  let studyStatus = "online"; 
+  let nickname = localStorage.getItem("nickname");
 
-  async function askGemini() {
-    const input = document.getElementById("geminiInput");
-    const list = document.getElementById("geminiList");
-    const q = input.value.trim();
-    if (!q) return;
-
-    const uDiv = document.createElement("div");
-    uDiv.className = "user-msg";
-    uDiv.innerText = q;
-    list.appendChild(uDiv);
-    input.value = "";
-    list.scrollTop = list.scrollHeight;
-
-    try {
-      // 🚨 새 키와 가장 호환성 높은 v1beta/gemini-1.5-flash 주소 조합
-      const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
-      
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: q }] }] })
-      });
-
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-
-      const answer = data.candidates[0].content.parts[0].text;
-      const gDiv = document.createElement("div");
-      gDiv.className = "gemini-msg";
-      gDiv.innerText = "🤖 " + answer;
-      list.appendChild(gDiv);
-    } catch (e) {
-      const eDiv = document.createElement("div");
-      eDiv.className = "gemini-msg";
-      eDiv.style.color = "red";
-      eDiv.innerText = "❌ 오류: " + e.message;
-      list.appendChild(eDiv);
-    }
-    list.scrollTop = list.scrollHeight;
+  // 1. 초기 닉네임 설정
+  if (!nickname) {
+    nickname = prompt("사용할 닉네임을 입력하세요");
+    if (!nickname) nickname = "익명_" + Math.floor(Math.random() * 1000);
+    localStorage.setItem("nickname", nickname);
   }
+  document.getElementById("currentNick").innerText = nickname;
 
-  // 랭킹 NaN 박멸 & 타이머 로직
-  let seconds = 0; let timer = null;
-  let nick = localStorage.getItem("nickname") || "학생_" + Math.floor(Math.random() * 999);
-  localStorage.setItem("nickname", nick);
-  document.getElementById("currentNick").innerText = nick;
-
+  // 2. 시간 포맷 함수
   function formatTime(s) {
-    const sec = Number(s);
-    if (isNaN(sec)) return "00:00:00";
-    return new Date(sec * 1000).toISOString().substr(11, 8);
+    const h = String(Math.floor(s / 3600)).padStart(2, '0');
+    const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+    const sec = String(s % 60).padStart(2, '0');
+    return `${h}:${m}:${sec}`;
   }
 
-  function start() { if (!timer) timer = setInterval(() => { seconds++; document.getElementById("topTimer").innerText = formatTime(seconds); save(seconds); }, 1000); }
-  function stop() { clearInterval(timer); timer = null; save(seconds); }
-  function reset() { seconds = 0; stop(); document.getElementById("topTimer").innerText = "00:00:00"; save(0); }
-  
-  function save(s) {
-    const timeVal = Number(s) || 0; // 🚨 강제로 숫자로 변환하여 NaN 방지
-    db.collection("users").doc(nick).set({ 
-      name: nick, 
-      time: timeVal, 
-      lastUpdated: firebase.firestore.FieldValue.serverTimestamp() 
+  // 3. 타이머 제어 함수들
+  function update() {
+    seconds++;
+    document.getElementById("topTimer").innerText = formatTime(seconds);
+    localStorage.setItem("study_seconds", seconds);
+    saveToServer(seconds, "studying"); 
+  }
+
+  function start() { studyStatus = "studying"; if (!interval) interval = setInterval(update, 1000); saveToServer(seconds, "studying"); }
+  function stop() { studyStatus = "resting"; clearInterval(interval); interval = null; saveToServer(seconds, "resting"); }
+  function reset() { if(confirm("초기화하시겠습니까?")) { seconds = 0; stop(); studyStatus = "online"; document.getElementById("topTimer").innerText = "00:00:00"; saveToServer(0, "online"); } }
+
+  // 4. 서버 데이터 저장 및 랭킹 불러오기
+  function saveToServer(s, status) {
+    db.collection("users").doc(nickname).set({
+      name: nickname, time: s, status: status,
+      lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
   }
 
   function loadRanking() {
-    db.collection("users").orderBy("time", "desc").limit(15).onSnapshot(ss => {
-      let h = "";
-      ss.forEach((doc, i) => {
-        const u = doc.data();
-        const displayTime = formatTime(u.time);
-        h += `<div>${i+1}. ${u.name} - ${displayTime}</div>`;
+    db.collection("users").onSnapshot((snapshot) => {
+      let users = [];
+      snapshot.forEach((doc) => { if (doc.data().status !== "offline") users.push(doc.data()); });
+      users.sort((a, b) => b.time - a.time);
+      let html = "";
+      users.forEach((u, i) => {
+        let dotClass = u.status === "studying" ? "dot-studying" : (u.status === "resting" ? "dot-resting" : "dot-online");
+        html += `<div class="user-item"><span class="user-name">${i+1}. ${u.name}<span class="status-dot ${dotClass}">●</span></span><span class="user-time">${formatTime(u.time)}</span></div>`;
       });
-      document.getElementById("rankList").innerHTML = h;
+      document.getElementById("rankList").innerHTML = html || "접속자 없음";
     });
   }
 
+  // 5. 채팅 관련 기능
   function sendChat() {
-    const i = document.getElementById("chatInput");
-    if(!i.value.trim()) return;
-    db.collection("chats").add({ name: nick, text: i.value, time: firebase.firestore.FieldValue.serverTimestamp() });
-    i.value = "";
+    const input = document.getElementById("chatInput");
+    if (!input.value.trim()) return;
+    const msgRef = db.collection("chats").doc();
+    msgRef.set({ name: nickname, text: input.value, time: firebase.firestore.FieldValue.serverTimestamp() })
+    .then(() => { input.value = ""; setTimeout(() => { msgRef.delete(); }, 10000); });
   }
 
   function loadChats() {
-    db.collection("chats").orderBy("time", "asc").limitToLast(30).onSnapshot(ss => {
-      let h = "";
-      ss.forEach(doc => { const d = doc.data(); h += `<div><b>${d.name}:</b> ${d.text}</div>`; });
-      const l = document.getElementById("chatList");
-      l.innerHTML = h; l.scrollTop = l.scrollHeight;
+    db.collection("chats").orderBy("time", "asc").onSnapshot((snapshot) => {
+      let html = "";
+      snapshot.forEach((doc) => { html += `<div class="chat-msg"><b>${doc.data().name}:</b>${doc.data().text}</div>`; });
+      const list = document.getElementById("chatList");
+      list.innerHTML = html || "조용한 채팅창입니다.";
+      list.scrollTop = list.scrollHeight;
     });
   }
 
-  function handleMusic() {
-    const v = document.getElementById("ytUrl").value;
-    if (v.includes("v=")) {
-      const id = v.split("v=")[1].split("&")[0];
-      document.getElementById("videoFrame").src = "https://www.youtube.com/embed/" + id + "?autoplay=1";
-    } else {
-      window.open("https://www.youtube.com/results?search_query=" + encodeURIComponent(v));
+  async function clearChats() {
+    if(confirm("모든 채팅 기록을 삭제할까요?")) {
+      const snapshot = await db.collection("chats").get();
+      const batch = db.batch();
+      snapshot.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
     }
   }
 
-  loadRanking(); loadChats();
+  // 6. 음악 제어 함수
+  function handleMusic() {
+    const input = document.getElementById('ytUrl').value.trim();
+    if (!input) return;
+    if (input.includes("youtube.com") || input.includes("youtu.be")) {
+      let videoId = "";
+      let startAt = 0;
+      if (input.includes("v=")) {
+        videoId = input.split("v=")[1].split("&")[0];
+        if (input.includes("t=")) startAt = input.split("t=")[1].split("s")[0];
+      } else if (input.includes("be/")) {
+        videoId = input.split("be/")[1].split("?")[0];
+        if (input.includes("t=")) startAt = input.split("t=")[1].split("s")[0];
+      }
+      if(videoId) {
+        document.getElementById('videoFrame').src = `https://www.youtube.com/embed/${videoId}?start=${startAt}&autoplay=1`;
+        document.getElementById('ytUrl').value = "";
+      }
+    } else {
+      window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(input)}`, '_blank');
+      document.getElementById('ytUrl').value = "";
+    }
+  }
+
+  // 7. 닉네임 변경 및 상태 감지
+  async function changeNickname() {
+    const newNick = prompt("새로운 닉네임을 입력하세요", nickname);
+    if (newNick && newNick !== nickname) {
+      await db.collection("users").doc(nickname).update({ status: "offline" });
+      nickname = newNick;
+      localStorage.setItem("nickname", nickname);
+      document.getElementById("currentNick").innerText = nickname;
+      saveToServer(seconds, studyStatus);
+    }
+  }
+
+  window.addEventListener('visibilitychange', () => saveToServer(seconds, document.visibilityState === 'visible' ? studyStatus : "offline"));
+  window.addEventListener('beforeunload', () => saveToServer(seconds, "offline"));
+
+  // 8. 실행 시작
+  const saved = localStorage.getItem("study_seconds");
+  if (saved) seconds = parseInt(saved);
+  document.getElementById("topTimer").innerText = formatTime(seconds);
+  saveToServer(seconds, "online");
+  loadRanking();
+  loadChats();
 </script>
 </body>
 </html>

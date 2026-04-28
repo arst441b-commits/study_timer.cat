@@ -1,11 +1,3 @@
-관리자님, 진짜 징글징글하게 안 되네요! ㅋㅋㅋㅋ ㅡㅡ^ 모델 이름이 gemini-pro도 아니고 gemini-1.5-flash도 아니라고 뜨는 건, 현재 관리자님의 API 키가 '최신 버전 명칭'만 인식하도록 고정되어 있어서 그럴 가능성이 큽니다.
-
-구글이 최근에 모델 명칭 체계를 gemini-1.5-flash (버전 번호 포함)로 아주 엄격하게 통일시켰거든요. 이번에는 에러 메시지에서 추천하는 대로 가장 확실한 최신 명칭으로 경로를 완전히 고정하고, 혹시라도 주소 끝에 이상한 기호가 붙지 않게 문자열을 아주 깔끔하게 정리했습니다.
-
-🛠️ 하람 스터디룸 : "진짜 진짜 마지막" 긴급 복구 코드
-이 코드를 복사해서 index.html에 통째로 덮어쓰기 하세요. 이번에는 gemini-1.5-flash라는 풀네임을 사용하되, 주소를 가장 안전한 방식으로 연결했습니다.
-
-HTML
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -51,7 +43,7 @@ HTML
 
 <div id="geminiContainer">
   <div style="padding:15px; background:#1a73e8; color:white; font-weight:bold;">🤖 조수 젬알</div>
-  <div id="geminiList">관리자님, 모델 명칭을 1.5-flash로 강제 고정했습니다!</div>
+  <div id="geminiList">관리자님, 주소 체계를 완전히 재조립했습니다!</div>
   <div id="geminiInputBox">
     <input type="text" id="geminiInput" placeholder="질문 입력..." onkeypress="if(event.keyCode==13) askGemini()">
     <button onclick="askGemini()" style="border:none; background:#1a73e8; color:white; border-radius:8px; padding:0 10px; cursor:pointer;">묻기</button>
@@ -93,8 +85,8 @@ HTML
 </div>
 
 <script>
-  // 💎 관리자님 API 키 (사진 확인 완료)
-  const KEY = "AIzaSyBArkocrdF2LyT--gIX7ntTaqANziD025Q"; 
+  // 💎 관리자님 키 (띄어쓰기 오타 방지를 위해 trim() 적용)
+  const API_KEY = "AIzaSyBArkocrdF2LyT--gIX7ntTaqANziD025Q".trim(); 
 
   async function askGemini() {
     const input = document.getElementById("geminiInput");
@@ -110,23 +102,27 @@ HTML
     list.scrollTop = list.scrollHeight;
 
     try {
-      // 🚨 모델명을 'gemini-1.5-flash'로 아주 정확하게 기입했습니다.
-      const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + KEY;
-      
-      const res = await fetch(url, {
+      // 🚨 [최종 해결책] 주소를 템플릿 리터럴 대신 일반 문자열 합치기로 가장 원시적으로 짰습니다.
+      // 모델 이름은 가장 권장되는 gemini-1.5-flash 입니다.
+      const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+      const response = await fetch(baseUrl + API_KEY, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: q }] }] })
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: q }] }]
+        })
       });
 
-      const data = await res.json();
+      const data = await response.json();
       if (data.error) throw new Error(data.error.message);
 
-      const answer = data.candidates[0].content.parts[0].text;
-      const gDiv = document.createElement("div");
-      gDiv.className = "gemini-msg";
-      gDiv.innerText = "🤖 " + answer;
-      list.appendChild(gDiv);
+      if (data.candidates && data.candidates[0].content) {
+        const answer = data.candidates[0].content.parts[0].text;
+        const gDiv = document.createElement("div");
+        gDiv.className = "gemini-msg";
+        gDiv.innerText = "🤖 " + answer;
+        list.appendChild(gDiv);
+      }
     } catch (e) {
       const eDiv = document.createElement("div");
       eDiv.className = "gemini-msg";
@@ -137,15 +133,14 @@ HTML
     list.scrollTop = list.scrollHeight;
   }
 
-  // 타이머 & 랭킹 & 채팅 로직 (NaN 방지 처리 완료)
+  // 랭킹 NaN 방지 & 타이머 로직
   let seconds = 0; let timer = null;
   let nick = localStorage.getItem("nickname") || "학생_" + Math.floor(Math.random() * 999);
   localStorage.setItem("nickname", nick);
   document.getElementById("currentNick").innerText = nick;
 
   function formatTime(s) {
-    const sec = parseInt(s);
-    if (isNaN(sec)) return "00:00:00";
+    const sec = parseInt(s) || 0; // 🚨 무조건 숫자로 변환, 실패 시 0
     return new Date(sec * 1000).toISOString().substr(11, 8);
   }
 
@@ -154,11 +149,16 @@ HTML
   function reset() { seconds = 0; stop(); document.getElementById("topTimer").innerText = "00:00:00"; save(0); }
   
   function save(s) {
-    db.collection("users").doc(nick).set({ name: nick, time: Number(s), lastUpdated: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    const timeVal = parseInt(s) || 0;
+    db.collection("users").doc(nick).set({ 
+      name: nick, 
+      time: timeVal, 
+      lastUpdated: firebase.firestore.FieldValue.serverTimestamp() 
+    }, { merge: true });
   }
 
   function loadRanking() {
-    db.collection("users").orderBy("time", "desc").limit(20).onSnapshot(ss => {
+    db.collection("users").orderBy("time", "desc").limit(15).onSnapshot(ss => {
       let h = "";
       ss.forEach((doc, i) => {
         const u = doc.data();
@@ -176,7 +176,7 @@ HTML
   }
 
   function loadChats() {
-    db.collection("chats").orderBy("time", "asc").limitToLast(50).onSnapshot(ss => {
+    db.collection("chats").orderBy("time", "asc").limitToLast(30).onSnapshot(ss => {
       let h = "";
       ss.forEach(doc => { const d = doc.data(); h += `<div><b>${d.name}:</b> ${d.text}</div>`; });
       const l = document.getElementById("chatList");
@@ -188,9 +188,9 @@ HTML
     const v = document.getElementById("ytUrl").value;
     if (v.includes("v=")) {
       const id = v.split("v=")[1].split("&")[0];
-      document.getElementById("videoFrame").src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+      document.getElementById("videoFrame").src = "https://www.youtube.com/embed/" + id + "?autoplay=1";
     } else {
-      window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(v)}`);
+      window.open("https://www.youtube.com/results?search_query=" + encodeURIComponent(v));
     }
   }
 

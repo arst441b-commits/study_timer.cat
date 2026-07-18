@@ -1,3 +1,10 @@
+네, 당연히 그것도 가능합니다! 스마트폰 안에 들어있는 자이로스코프/가속도 센서(기울기 인식 센서)를 이용하면, 폰을 왼쪽으로 기울였을 때 고양이가 왼쪽으로 스르륵 굴러가고 오른쪽으로 기울이면 오른쪽으로 굴러가게 만들 수 있습니다.
+
+스마트폰을 기울이는 방향대로 중력이 작동하도록 코드를 한 단계 더 업그레이드했습니다.
+
+마우스, 터치, 그리고 기울기 인식까지 세 가지 기능이 모두 들어간 최종 버전입니다! 아래 코드를 똑같이 복사해서 index2.html에 덮어쓰기 해주세요.
+
+HTML
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -11,7 +18,7 @@
             background: #f0f2f5;
             overflow: hidden;
             user-select: none;
-            touch-action: none; /* 스마트폰 화면이 멋대로 스크롤되거나 확대되는 걸 막아줍니다 */
+            touch-action: none;
         }
         .cat {
             position: absolute;
@@ -41,7 +48,12 @@
     let y = 100;
     let vx = 5; 
     let vy = 0;
-    const gravity = 0.6;
+    
+    // 기본 물리 값
+    let baseGravity = 0.6;
+    let gravityX = 0;        // 폰 기울기에 따른 X축 중력
+    let gravityY = baseGravity; // 폰 기울기에 따른 Y축 중력
+    
     const bounce = 0.75;
     const friction = 0.99;
     
@@ -54,7 +66,25 @@
     cat.style.left = x + 'px';
     cat.style.top = y + 'px';
 
-    // --- 마우스 & 터치 이벤트 통합 함수 ---
+    // 스마트폰 기울기 센서 감지 📱✨
+    if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', (e) => {
+            // e.gamma: 좌우 기울기 (-90 ~ 90)
+            // e.beta: 상하 기울기 (-180 ~ 180)
+            if (e.gamma !== null && e.beta !== null) {
+                // 폰을 기울이는 방향에 따라 중력 방향을 계산합니다.
+                gravityX = (e.gamma / 90) * 1.5; 
+                gravityY = (e.beta / 90) * 1.5;
+                
+                // 폰을 너무 평평하게 눕혔을 때 최저 중력 유지
+                if (Math.abs(gravityY) < 0.2 && Math.abs(gravityX) < 0.2) {
+                    gravityY = baseGravity;
+                }
+            }
+        });
+    }
+
+    // 드래그 기능 함수
     function startDrag(clientX, clientY) {
         isDragging = true;
         cat.classList.add('dragging');
@@ -85,12 +115,12 @@
         }
     }
 
-    // 컴퓨터 마우스 이벤트
+    // 마우스 이벤트
     cat.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
     window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
     window.addEventListener('mouseup', endDrag);
 
-    // 스마트폰 터치 이벤트 추가!📱
+    // 터치 이벤트
     cat.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
         startDrag(touch.clientX, touch.clientY);
@@ -104,18 +134,24 @@
     // 물리 엔진 루프
     function updatePhysics() {
         if (!isDragging) {
-            AIWalkTimer++;
-            if (AIWalkTimer > 100) { 
-                if (y >= window.innerHeight - 85) {
-                    if (Math.random() < 0.4) {
-                        vy = -(Math.random() * 8 + 6); 
-                        vx = (Math.random() - 0.5) * 15; 
+            // 자율 행동 (기울기가 거의 없을 때만 스스로 움직임)
+            if (Math.abs(gravityX) < 0.3) {
+                AIWalkTimer++;
+                if (AIWalkTimer > 100) { 
+                    if (y >= window.innerHeight - 85) {
+                        if (Math.random() < 0.4) {
+                            vy = -(Math.random() * 8 + 6); 
+                            vx = (Math.random() - 0.5) * 15; 
+                        }
                     }
+                    AIWalkTimer = 0;
                 }
-                AIWalkTimer = 0;
             }
 
-            vy += gravity;
+            // 실시간 기울기 중력 적용
+            vx += gravityX;
+            vy += gravityY;
+            
             vx *= friction;
             vy *= friction;
 
@@ -125,26 +161,32 @@
             const maxX = window.innerWidth - 80;
             const maxY = window.innerHeight - 80;
 
+            // 바닥 충돌
             if (y >= maxY) {
                 y = maxY;
                 vy = -vy * bounce;
-                if (Math.abs(vx) < 1) vx = (Math.random() > 0.5 ? 2 : -2);
+                vx *= 0.9; 
             }
+            // 천장 충돌
             if (y <= 0) {
                 y = 0;
                 vy = -vy * bounce;
+                vx *= 0.9;
             }
+            // 오른쪽 벽 충돌
             if (x >= maxX) {
                 x = maxX;
                 vx = -vx * bounce;
-                vy = -Math.random() * 5; 
+                vy *= 0.9;
             }
+            // 왼쪽 벽 충돌
             if (x <= 0) {
                 x = 0;
                 vx = -vx * bounce;
-                vy = -Math.random() * 5; 
+                vy *= 0.9;
             }
 
+            // 속도에 맞춰 회전
             catAngle += vx * 0.8;
             
             cat.style.left = x + 'px';

@@ -11,6 +11,7 @@
             background: #f0f2f5;
             overflow: hidden;
             user-select: none;
+            touch-action: none; /* 스마트폰 화면이 멋대로 스크롤되거나 확대되는 걸 막아줍니다 */
         }
         .cat {
             position: absolute;
@@ -45,56 +46,70 @@
     const friction = 0.99;
     
     let isDragging = false;
-    let prevMouseX = 0;
-    let prevMouseY = 0;
+    let prevX = 0;
+    let prevY = 0;
     let catAngle = 0;
-    
-    // 자율 행동을 위한 타이머 변수
     let AIWalkTimer = 0;
 
     cat.style.left = x + 'px';
     cat.style.top = y + 'px';
 
-    cat.addEventListener('mousedown', (e) => {
+    // --- 마우스 & 터치 이벤트 통합 함수 ---
+    function startDrag(clientX, clientY) {
         isDragging = true;
         cat.classList.add('dragging');
         vx = 0;
         vy = 0;
-        prevMouseX = e.clientX;
-        prevMouseY = e.clientY;
-    });
+        prevX = clientX;
+        prevY = clientY;
+    }
 
-    window.addEventListener('mousemove', (e) => {
+    function moveDrag(clientX, clientY) {
         if (!isDragging) return;
-        vx = e.clientX - prevMouseX;
-        vy = e.clientY - prevMouseY;
-        x = e.clientX - 40;
-        y = e.clientY - 40;
+        vx = clientX - prevX;
+        vy = clientY - prevY;
+        x = clientX - 40;
+        y = clientY - 40;
         cat.style.left = x + 'px';
         cat.style.top = y + 'px';
-        prevMouseX = e.clientX;
-        prevMouseY = e.clientY;
+        prevX = clientX;
+        prevY = clientY;
         catAngle = vx * 2;
         cat.style.transform = `rotate(${catAngle}deg)`;
-    });
+    }
 
-    window.addEventListener('mouseup', () => {
+    function endDrag() {
         if (isDragging) {
             isDragging = false;
             cat.classList.remove('dragging');
         }
-    });
+    }
 
+    // 컴퓨터 마우스 이벤트
+    cat.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+    window.addEventListener('mouseup', endDrag);
+
+    // 스마트폰 터치 이벤트 추가!📱
+    cat.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        startDrag(touch.clientX, touch.clientY);
+    });
+    window.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        moveDrag(touch.clientX, touch.clientY);
+    });
+    window.addEventListener('touchend', endDrag);
+
+    // 물리 엔진 루프
     function updatePhysics() {
         if (!isDragging) {
-            // 혼자 돌아다니는 AI 시스템
             AIWalkTimer++;
             if (AIWalkTimer > 100) { 
-                // 바닥에 있을 때 가끔 점프하거나 대시함
                 if (y >= window.innerHeight - 85) {
                     if (Math.random() < 0.4) {
-                        vy = -(Math.random() * 8 + 6); // 점프!
-                        vx = (Math.random() - 0.5) * 15; // 좌우 대시!
+                        vy = -(Math.random() * 8 + 6); 
+                        vx = (Math.random() - 0.5) * 15; 
                     }
                 }
                 AIWalkTimer = 0;
@@ -113,7 +128,6 @@
             if (y >= maxY) {
                 y = maxY;
                 vy = -vy * bounce;
-                // 바닥에서 최소한의 움직임 유지
                 if (Math.abs(vx) < 1) vx = (Math.random() > 0.5 ? 2 : -2);
             }
             if (y <= 0) {
@@ -123,12 +137,12 @@
             if (x >= maxX) {
                 x = maxX;
                 vx = -vx * bounce;
-                vy = -Math.random() * 5; // 벽 타며 튕기기 효과
+                vy = -Math.random() * 5; 
             }
             if (x <= 0) {
                 x = 0;
                 vx = -vx * bounce;
-                vy = -Math.random() * 5; // 벽 타며 튕기기 효과
+                vy = -Math.random() * 5; 
             }
 
             catAngle += vx * 0.8;

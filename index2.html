@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            overflow: hidden;
+            user-select: none;
+        }
+        .cat {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            font-size: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            transform-origin: center;
+            z-index: 1000;
+        }
+        .cat.dragging {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body>
+
+<div class="cat" id="cat">🐱</div>
+
+<script>
+    const cat = document.getElementById('cat');
+    
+    let x = window.innerWidth / 2 - 40;
+    let y = 100;
+    let vx = 5; 
+    let vy = 0;
+    const gravity = 0.6;
+    const bounce = 0.75;
+    const friction = 0.99;
+    
+    let isDragging = false;
+    let prevMouseX = 0;
+    let prevMouseY = 0;
+    let catAngle = 0;
+    
+    // 자율 행동을 위한 타이머 변수
+    let AIWalkTimer = 0;
+
+    cat.style.left = x + 'px';
+    cat.style.top = y + 'px';
+
+    cat.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        cat.classList.add('dragging');
+        vx = 0;
+        vy = 0;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        vx = e.clientX - prevMouseX;
+        vy = e.clientY - prevMouseY;
+        x = e.clientX - 40;
+        y = e.clientY - 40;
+        cat.style.left = x + 'px';
+        cat.style.top = y + 'px';
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+        catAngle = vx * 2;
+        cat.style.transform = `rotate(${catAngle}deg)`;
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            cat.classList.remove('dragging');
+        }
+    });
+
+    function updatePhysics() {
+        if (!isDragging) {
+            // 혼자 돌아다니는 AI 시스템
+            AIWalkTimer++;
+            if (AIWalkTimer > 100) { 
+                // 바닥에 있을 때 가끔 점프하거나 대시함
+                if (y >= window.innerHeight - 85) {
+                    if (Math.random() < 0.4) {
+                        vy = -(Math.random() * 8 + 6); // 점프!
+                        vx = (Math.random() - 0.5) * 15; // 좌우 대시!
+                    }
+                }
+                AIWalkTimer = 0;
+            }
+
+            vy += gravity;
+            vx *= friction;
+            vy *= friction;
+
+            x += vx;
+            y += vy;
+
+            const maxX = window.innerWidth - 80;
+            const maxY = window.innerHeight - 80;
+
+            if (y >= maxY) {
+                y = maxY;
+                vy = -vy * bounce;
+                // 바닥에서 최소한의 움직임 유지
+                if (Math.abs(vx) < 1) vx = (Math.random() > 0.5 ? 2 : -2);
+            }
+            if (y <= 0) {
+                y = 0;
+                vy = -vy * bounce;
+            }
+            if (x >= maxX) {
+                x = maxX;
+                vx = -vx * bounce;
+                vy = -Math.random() * 5; // 벽 타며 튕기기 효과
+            }
+            if (x <= 0) {
+                x = 0;
+                vx = -vx * bounce;
+                vy = -Math.random() * 5; // 벽 타며 튕기기 효과
+            }
+
+            catAngle += vx * 0.8;
+            
+            cat.style.left = x + 'px';
+            cat.style.top = y + 'px';
+            cat.style.transform = `rotate(${catAngle}deg)`;
+        }
+        requestAnimationFrame(updatePhysics);
+    }
+
+    updatePhysics();
+
+    window.addEventListener('resize', () => {
+        if (x > window.innerWidth - 80) x = window.innerWidth - 80;
+        if (y > window.innerHeight - 80) y = window.innerHeight - 80;
+    });
+</script>
+
+</body>
+</html>
